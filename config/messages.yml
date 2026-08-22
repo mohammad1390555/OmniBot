@@ -1,0 +1,352 @@
+# ============================================================
+#  OmniBot — Messages / Translations
+#  All text the bot sends lives here. Add your own language by
+#  copying a block and translating it, then set the guild
+#  language with /config language.
+#
+#  Placeholders use Python str.format style: {user} {server} ...
+# ============================================================
+
+en:
+  # ---------- generic ----------
+  error_generic: "❌ Something went wrong. Please try again later."
+  error_no_permission: "❌ You don't have permission to use this command."
+  error_bot_no_permission: "❌ I'm missing permissions to do that: {perms}"
+  error_cooldown: "⏳ Slow down! Try again in {seconds:.0f}s."
+  error_not_found: "❌ {target} not found."
+  error_disabled_module: "❌ The **{module}** module is disabled on this server. Enable it with `/config modules`."
+  confirm_prompt: "⚠️ Are you sure you want to {action}?"
+  confirm_yes: "Yes, do it"
+  confirm_no: "Cancel"
+  confirm_timeout: "Confirmation timed out — action cancelled."
+  confirm_cancelled: "Action cancelled."
+  reason_none: "No reason provided"
+
+  # ---------- help ----------
+  help_title: "📚 OmniBot Help"
+  help_description: "Choose a category below to see its commands."
+  help_footer: "OmniBot • All-in-One Discord Bot"
+
+  # ---------- moderation ----------
+  mod_ban_success: "🔨 **{user}** has been banned."
+  mod_unban_success: "✅ **{user}** has been unbanned."
+  mod_kick_success: "👢 **{user}** has been kicked."
+  mod_softban_success: "🔨 **{user}** has been softbanned (messages cleared)."
+  mod_timeout_success: "🔇 **{user}** has been muted until {until}."
+  mod_unmute_success: "🔊 **{user}** has been unmuted."
+  mod_warn_success: "⚠️ **{user}** has been warned ({count} warning(s) total)."
+  mod_warn_dm: "You have been warned in **{server}**.\nReason: {reason}"
+  mod_unwarn_success: "✅ Removed warning #{id} from **{user}**."
+  mod_warnings_empty: "**{user}** has no warnings."
+  mod_purge_success: "🗑️ Deleted {count} message(s)."
+  mod_lock_success: "🔒 {channel} has been locked."
+  mod_unlock_success: "🔓 {channel} has been unlocked."
+  mod_lockdown_on: "🚨 **SERVER LOCKDOWN** — all channels locked."
+  mod_lockdown_off: "✅ Lockdown lifted — channels restored."
+  mod_slowmode_set: "🐌 Slowmode set to {seconds}s in {channel}."
+  mod_slowmode_off: "🐌 Slowmode disabled in {channel}."
+  mod_nick_set: "✏️ Nickname of **{user}** set to **{nick}**."
+  mod_nick_reset: "✏️ Nickname of **{user}** reset."
+  mod_case_logged: "📋 Case **#{id}** logged ({action})."
+  mod_history_title: "📜 Moderation history for {user}"
+  mod_cannot_punish: "❌ I can't punish this member (role hierarchy)."
+  mod_cannot_punish_self: "❌ You can't punish yourself."
+  mod_cannot_punish_owner: "❌ You can't punish the server owner."
+
+  # ---------- automod ----------
+  automod_deleted: "🛡️ Your message in {channel} was removed by AutoMod."
+  automod_reason_word: "banned word"
+  automod_reason_invite: "invite link"
+  automod_reason_link: "link"
+  automod_reason_mentions: "too many mentions"
+  automod_reason_caps: "too many caps"
+  automod_reason_emoji: "too many emojis"
+  automod_config_updated: "✅ AutoMod settings updated."
+
+  # ---------- logging ----------
+  log_msg_deleted: "🗑️ Message deleted in {channel}"
+  log_msg_edited: "✏️ Message edited in {channel}"
+  log_member_join: "📥 Member joined"
+  log_member_leave: "📤 Member left"
+  log_member_ban: "🔨 Member banned"
+  log_member_unban: "✅ Member unbanned"
+  log_voice_join: "🎙️ Joined voice channel"
+  log_voice_leave: "🎙️ Left voice channel"
+  log_voice_move: "🎙️ Moved voice channel"
+  log_channel_created: "📁 Channel created"
+  log_channel_deleted: "🗑️ Channel deleted"
+  log_role_created: "🎨 Role created"
+  log_role_deleted: "🗑️ Role deleted"
+  log_nick_changed: "✏️ Nickname changed"
+
+  # ---------- utility ----------
+  util_ping: "🏓 Pong! Gateway: **{gateway}ms** | API: **{api}ms**"
+  util_userinfo_title: "👤 User Info — {user}"
+  util_serverinfo_title: "📊 Server Info — {server}"
+  util_avatar_title: "🖼️ Avatar — {user}"
+  util_banner_none: "This user has no banner."
+  util_roleinfo_title: "🎨 Role Info — {role}"
+  util_channelinfo_title: "📁 Channel Info — {channel}"
+  util_botinfo_title: "🤖 Bot Info"
+  util_reminder_set: "⏰ I'll remind you in {duration}."
+  util_reminder_due: "⏰ Reminder for {user}:"
+  util_afk_set: "💤 {user} is now AFK: {reason}"
+  util_afk_back: "👋 Welcome back {user}! You were AFK for {duration}."
+  util_afk_mention: "💤 **{user}** is AFK: {reason} (since {since})"
+  util_poll_title: "📊 Poll — {question}"
+  util_poll_ended: "📊 Poll ended — results above!"
+  util_suggest_sent: "💡 Suggestion submitted! ID: #{id}"
+  util_snipe_empty: "Nothing to snipe in this channel."
+  util_translate_title: "🌐 Translation"
+
+  # ---------- tickets ----------
+  ticket_button: "🎫 Open Ticket"
+  ticket_created: "🎫 Ticket created: {channel}"
+  ticket_close_button: "🔒 Close"
+  ticket_claim_button: "🙋 Claim"
+  ticket_closed: "✅ Ticket closed by {user}."
+  ticket_limit: "❌ You already have an open ticket."
+  ticket_transcript: "📄 Transcript for ticket #{id}"
+
+  # ---------- giveaways ----------
+  giveaway_title: "🎉 GIVEAWAY — {prize}"
+  giveaway_join: "🎉 Enter"
+  giveaway_end: "🎉 Giveaway ended! Winner(s): {winners}"
+  giveaway_no_entries: "No one entered the giveaway."
+  giveaway_started: "🎉 Giveaway started in {channel}!"
+  giveaway_reroll: "🎲 Rerolled! New winner(s): {winners}"
+
+  # ---------- leveling ----------
+  level_up: "🎉 GG {user}! You reached **level {level}**!"
+  rank_title: "📈 Rank — {user}"
+  leaderboard_title: "🏆 XP Leaderboard — {server}"
+  leaderboard_empty: "No one has earned XP yet."
+
+  # ---------- economy ----------
+  eco_balance: "{emoji} **{user}** has **{amount} {currency}**."
+  eco_daily: "{emoji} You claimed your daily **{amount} {currency}**!"
+  eco_weekly: "{emoji} You claimed your weekly **{amount} {currency}**!"
+  eco_work: "💼 {flavor} You earned **{amount} {currency}**!"
+  eco_pay: "{emoji} {sender} paid **{amount} {currency}** to {receiver}."
+  eco_insufficient: "❌ You don't have enough {currency}."
+  eco_cooldown: "⏳ You can do that again in {duration}."
+  eco_gamble_win: "🎰 You won **{amount} {currency}**!"
+  eco_gamble_lose: "🎰 You lost **{amount} {currency}**."
+  eco_shop_title: "🛒 Server Shop"
+  eco_shop_bought: "🛍️ You bought **{item}**!"
+
+  # ---------- fun ----------
+  fun_8ball_title: "🎱 Magic 8-Ball"
+  fun_rps_title: "✊ Rock Paper Scissors"
+  fun_ship_title: "💞 Ship Meter"
+  fun_rate_title: "⭐ Rating"
+  fun_count_wrong: "❌ Wrong number! The count resets to 1."
+  fun_count_next: "✅ Next number: **{next}**"
+
+  # ---------- welcome ----------
+  welcome_title: "👋 Welcome!"
+
+  # ---------- roles ----------
+  roles_added: "✅ Role {role} added."
+  roles_removed: "✅ Role {role} removed."
+  roles_menu_title: "🎭 Self-Assignable Roles"
+  roles_menu_placeholder: "Choose a role..."
+
+  # ---------- config ----------
+  config_updated: "✅ Setting **{key}** updated to `{value}`."
+  config_title: "⚙️ Server Configuration"
+  config_modules_title: "🧩 Feature Modules"
+  config_lang_set: "🌐 Language set to **{lang}**."
+  config_prefix_set: "✏️ Prefix set to `{prefix}`."
+
+  # ---------- music ----------
+  music_now_playing: "▶️ Now playing"
+  music_added_queue: "➕ Added to queue: **{title}**"
+  music_queue_title: "🎵 Queue"
+  music_queue_empty: "The queue is empty."
+  music_paused: "⏸️ Paused."
+  music_resumed: "▶️ Resumed."
+  music_skipped: "⏭️ Skipped."
+  music_stopped: "⏹️ Stopped and cleared the queue."
+  music_volume: "🔊 Volume set to {volume}%."
+  music_not_playing: "❌ Nothing is playing right now."
+  music_not_in_voice: "❌ You must be in a voice channel."
+  music_loop_track: "🔁 Looping current track."
+  music_loop_queue: "🔁 Looping the queue."
+  music_loop_off: "➡️ Loop disabled."
+
+  # ---------- owner ----------
+  owner_reloaded: "🔄 Reloaded {cogs}."
+  owner_shutdown: "👋 Shutting down..."
+
+fa:
+  # ---------- generic ----------
+  error_generic: "❌ مشکلی پیش آمد. لطفاً بعداً دوباره تلاش کنید."
+  error_no_permission: "❌ شما اجازه استفاده از این دستور را ندارید."
+  error_bot_no_permission: "❌ من دسترسی کافی ندارم: {perms}"
+  error_cooldown: "⏳ صبر کنید! {seconds:.0f} ثانیه دیگر دوباره تلاش کنید."
+  error_not_found: "❌ {target} پیدا نشد."
+  error_disabled_module: "❌ ماژول **{module}** در این سرور غیرفعال است. با `/config modules` فعالش کنید."
+  confirm_prompt: "⚠️ مطمئنید که می‌خواهید {action}؟"
+  confirm_yes: "بله، انجام بده"
+  confirm_no: "انصراف"
+  confirm_timeout: "زمان تأیید تمام شد — عملیات لغو شد."
+  confirm_cancelled: "عملیات لغو شد."
+  reason_none: "دلیلی ذکر نشده"
+
+  # ---------- help ----------
+  help_title: "📚 راهنمای OmniBot"
+  help_description: "یک دسته را از منوی زیر انتخاب کنید تا دستوراتش را ببینید."
+  help_footer: "OmniBot • ربات همه‌کاره دیسکورد"
+
+  # ---------- moderation ----------
+  mod_ban_success: "🔨 **{user}** بن شد."
+  mod_unban_success: "✅ **{user}** آنبن شد."
+  mod_kick_success: "👢 **{user}** از سرور اخراج شد."
+  mod_softban_success: "🔨 **{user}** سافت‌بن شد (پیام‌ها پاک شد)."
+  mod_timeout_success: "🔇 **{user}** تا {until} میوت شد."
+  mod_unmute_success: "🔊 **{user}** آنمیوت شد."
+  mod_warn_success: "⚠️ به **{user}** اخطار داده شد (مجموع: {count})."
+  mod_warn_dm: "شما در **{server}** اخطار گرفتید.\nدلیل: {reason}"
+  mod_unwarn_success: "✅ اخطار شماره {id} از **{user}** حذف شد."
+  mod_warnings_empty: "**{user}** هیچ اخطاری ندارد."
+  mod_purge_success: "🗑️ {count} پیام حذف شد."
+  mod_lock_success: "🔒 {channel} قفل شد."
+  mod_unlock_success: "🔓 {channel} باز شد."
+  mod_lockdown_on: "🚨 **قفل کامل سرور** — همه کانال‌ها قفل شدند."
+  mod_lockdown_off: "✅ قفل برداشته شد — کانال‌ها به حالت قبل برگشتند."
+  mod_slowmode_set: "🐌 اسلومود {seconds} ثانیه در {channel} تنظیم شد."
+  mod_slowmode_off: "🐌 اسلومود در {channel} غیرفعال شد."
+  mod_nick_set: "✏️ نام مستعار **{user}** به **{nick}** تغییر کرد."
+  mod_nick_reset: "✏️ نام مستعار **{user}** حذف شد."
+  mod_case_logged: "📋 پرونده **#{id}** ثبت شد ({action})."
+  mod_history_title: "📜 تاریخچه مدیریتی {user}"
+  mod_cannot_punish: "❌ نمی‌توانم این عضو را تنبیه کنم (سطح نقش‌ها)."
+  mod_cannot_punish_self: "❌ نمی‌توانید خودتان را تنبیه کنید."
+  mod_cannot_punish_owner: "❌ نمی‌توانید صاحب سرور را تنبیه کنید."
+
+  # ---------- automod ----------
+  automod_deleted: "🛡️ پیام شما در {channel} توسط AutoMod حذف شد."
+  automod_reason_word: "کلمه ممنوعه"
+  automod_reason_invite: "لینک دعوت"
+  automod_reason_link: "لینک"
+  automod_reason_mentions: "منشن بیش از حد"
+  automod_reason_caps: "حروف بزرگ بیش از حد"
+  automod_reason_emoji: "ایموجی بیش از حد"
+  automod_config_updated: "✅ تنظیمات AutoMod به‌روزرسانی شد."
+
+  # ---------- logging ----------
+  log_msg_deleted: "🗑️ پیام حذف شد در {channel}"
+  log_msg_edited: "✏️ پیام ویرایش شد در {channel}"
+  log_member_join: "📥 عضو وارد شد"
+  log_member_leave: "📤 عضو خارج شد"
+  log_member_ban: "🔨 عضو بن شد"
+  log_member_unban: "✅ عضو آنبن شد"
+  log_voice_join: "🎙️ وارد ویس شد"
+  log_voice_leave: "🎙️ از ویس خارج شد"
+  log_voice_move: "🎙️ ویس را عوض کرد"
+  log_channel_created: "📁 کانال ساخته شد"
+  log_channel_deleted: "🗑️ کانال حذف شد"
+  log_role_created: "🎨 نقش ساخته شد"
+  log_role_deleted: "🗑️ نقش حذف شد"
+  log_nick_changed: "✏️ نام مستعار تغییر کرد"
+
+  # ---------- utility ----------
+  util_ping: "🏓 پونگ! گیت‌وی: **{gateway}ms** | API: **{api}ms**"
+  util_userinfo_title: "👤 اطلاعات کاربر — {user}"
+  util_serverinfo_title: "📊 اطلاعات سرور — {server}"
+  util_avatar_title: "🖼️ آواتار — {user}"
+  util_banner_none: "این کاربر بنر ندارد."
+  util_roleinfo_title: "🎨 اطلاعات نقش — {role}"
+  util_channelinfo_title: "📁 اطلاعات کانال — {channel}"
+  util_botinfo_title: "🤖 اطلاعات ربات"
+  util_reminder_set: "⏰ {duration} دیگر یادت می‌اندازم."
+  util_reminder_due: "⏰ یادآوری برای {user}:"
+  util_afk_set: "💤 {user} الان AFK است: {reason}"
+  util_afk_back: "👋 خوش برگشتی {user}! مدت AFK: {duration}."
+  util_afk_mention: "💤 **{user}** AFK است: {reason} (از {since})"
+  util_poll_title: "📊 نظرسنجی — {question}"
+  util_poll_ended: "📊 نظرسنجی تمام شد — نتایج در بالا!"
+  util_suggest_sent: "💡 پیشنهاد ثبت شد! شماره: #{id}"
+  util_snipe_empty: "چیزی برای snipe در این کانال نیست."
+  util_translate_title: "🌐 ترجمه"
+
+  # ---------- tickets ----------
+  ticket_button: "🎫 باز کردن تیکت"
+  ticket_created: "🎫 تیکت ساخته شد: {channel}"
+  ticket_close_button: "🔒 بستن"
+  ticket_claim_button: "🙋 پاسخ‌دهی"
+  ticket_closed: "✅ تیکت توسط {user} بسته شد."
+  ticket_limit: "❌ شما همین الان یک تیکت باز دارید."
+  ticket_transcript: "📄 متن تیکت شماره {id}"
+
+  # ---------- giveaways ----------
+  giveaway_title: "🎉 گیو‌اوی — {prize}"
+  giveaway_join: "🎉 شرکت"
+  giveaway_end: "🎉 گیو‌اوی تمام شد! برنده(ها): {winners}"
+  giveaway_no_entries: "کسی در گیو‌اوی شرکت نکرد."
+  giveaway_started: "🎉 گیو‌اوی در {channel} شروع شد!"
+  giveaway_reroll: "🎲 قرعه‌کشی مجدد! برنده(های) جدید: {winners}"
+
+  # ---------- leveling ----------
+  level_up: "🎉 آفرین {user}! به **سطح {level}** رسیدی!"
+  rank_title: "📈 رتبه — {user}"
+  leaderboard_title: "🏆 جدول XP — {server}"
+  leaderboard_empty: "هنوز کسی XP نگرفته است."
+
+  # ---------- economy ----------
+  eco_balance: "{emoji} **{user}** دارای **{amount} {currency}** است."
+  eco_daily: "{emoji} جایزه روزانه **{amount} {currency}** گرفتی!"
+  eco_weekly: "{emoji} جایزه هفتگی **{amount} {currency}** گرفتی!"
+  eco_work: "💼 {flavor} **{amount} {currency}** درآوردی!"
+  eco_pay: "{emoji} {sender} مبلغ **{amount} {currency}** به {receiver} پرداخت کرد."
+  eco_insufficient: "❌ {currency} کافی نداری."
+  eco_cooldown: "⏳ {duration} دیگر می‌توانی دوباره این کار را بکنی."
+  eco_gamble_win: "🎰 **{amount} {currency}** بردی!"
+  eco_gamble_lose: "🎰 **{amount} {currency}** باختی."
+  eco_shop_title: "🛒 فروشگاه سرور"
+  eco_shop_bought: "🛍️ **{item}** را خریدی!"
+
+  # ---------- fun ----------
+  fun_8ball_title: "🎱 گوی جادویی"
+  fun_rps_title: "✊ سنگ کاغذ قیچی"
+  fun_ship_title: "💞 سنجه عشق"
+  fun_rate_title: "⭐ امتیاز"
+  fun_count_wrong: "❌ عدد اشتباه! شمارش از ۱ شروع می‌شود."
+  fun_count_next: "✅ عدد بعدی: **{next}**"
+
+  # ---------- welcome ----------
+  welcome_title: "👋 خوش آمدید!"
+
+  # ---------- roles ----------
+  roles_added: "✅ نقش {role} اضافه شد."
+  roles_removed: "✅ نقش {role} حذف شد."
+  roles_menu_title: "🎭 نقش‌های قابل انتخاب"
+  roles_menu_placeholder: "یک نقش انتخاب کنید..."
+
+  # ---------- config ----------
+  config_updated: "✅ تنظیم **{key}** به `{value}` تغییر کرد."
+  config_title: "⚙️ تنظیمات سرور"
+  config_modules_title: "🧩 ماژول‌های ربات"
+  config_lang_set: "🌐 زبان به **{lang}** تغییر کرد."
+  config_prefix_set: "✏️ پیشوند به `{prefix}` تغییر کرد."
+
+  # ---------- music ----------
+  music_now_playing: "▶️ در حال پخش"
+  music_added_queue: "➕ به صف اضافه شد: **{title}**"
+  music_queue_title: "🎵 صف پخش"
+  music_queue_empty: "صف پخش خالی است."
+  music_paused: "⏸️ متوقف شد."
+  music_resumed: "▶️ ادامه یافت."
+  music_skipped: "⏭️ رد شد."
+  music_stopped: "⏹️ پخش متوقف و صف خالی شد."
+  music_volume: "🔊 صدا روی {volume}% تنظیم شد."
+  music_not_playing: "❌ چیزی در حال پخش نیست."
+  music_not_in_voice: "❌ باید در یک کانال صوتی باشید."
+  music_loop_track: "🔁 تکرار آهنگ فعلی."
+  music_loop_queue: "🔁 تکرار صف."
+  music_loop_off: "➡️ تکرار غیرفعال شد."
+
+  # ---------- owner ----------
+  owner_reloaded: "🔄 {cogs} بارگذاری مجدد شد."
+  owner_shutdown: "👋 در حال خاموش شدن..."

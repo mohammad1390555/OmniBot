@@ -1,0 +1,180 @@
+# ============================================================
+#  OmniBot — Master Configuration
+#  Every bot setting lives in this file. Edit freely and
+#  restart the bot (or use /reload) to apply changes.
+# ============================================================
+
+bot:
+  # The bot token. Prefer setting DISCORD_TOKEN in .env instead of here.
+  # If both are set, the .env value wins.
+  token: ""
+
+  # Command prefix used when a guild has not set a custom one.
+  default_prefix: "!"
+
+  # Default language for new guilds (see config/messages.yml).
+  default_language: "en"
+
+  # Presence / activity shown under the bot name.
+  presence:
+    # status: online | idle | dnd | invisible
+    status: "online"
+    # activity: playing | watching | listening | competing
+    activity: "watching"
+    text: "/help | OmniBot"
+
+  # Branding used across every embed the bot sends.
+  branding:
+    name: "OmniBot"
+    version: "1.0.0"
+    # Hex color used for all embeds unless overridden.
+    color: "#5865F2"
+    footer_text: "OmniBot • All-in-One"
+    # Optional thumbnail / banner URLs.
+    thumbnail_url: ""
+    banner_url: ""
+
+  # Comma separated list of owner user IDs (extra owner commands).
+  # The application owner is always treated as owner automatically.
+  owner_ids: []
+
+  # Intents toggles (keep message_content true for moderation/automod).
+  intents:
+    message_content: true
+    members: true
+    voice_states: true
+    presences: false
+
+database:
+  # SQLite file path (created automatically). For PostgreSQL set the
+  # DATABASE_URL environment variable instead.
+  sqlite_path: "data/omnibot.db"
+
+logging:
+  # Console/file logging level: DEBUG | INFO | WARNING | ERROR
+  level: "INFO"
+  # Write logs to a file as well as the console.
+  file: "data/omnibot.log"
+
+# Default feature toggles for newly joined guilds. Server admins can
+# override these per-server with the /config commands.
+modules:
+  moderation: true
+  automod: true
+  logging: true
+  utility: true
+  fun: true
+  economy: true
+  leveling: true
+  tickets: true
+  giveaways: true
+  welcome: true
+  roles: true
+  music: true
+
+# ------------------------------------------------------------
+# Moderation defaults
+# ------------------------------------------------------------
+moderation:
+  # Maximum messages a single purge can delete.
+  max_purge: 500
+  # Confirm destructive actions with a button before executing.
+  confirm_actions: true
+  # Default reason when none is provided.
+  default_reason: "No reason provided"
+
+# ------------------------------------------------------------
+# Auto-moderation defaults
+# ------------------------------------------------------------
+automod:
+  enabled: true
+  # Words that are always filtered (add more per-server via /automod).
+  banned_words: []
+  block_invite_links: true
+  block_all_links: false
+  # Punish when a message has more than this many user mentions (0 = off).
+  max_mentions: 8
+  # Punish when caps ratio exceeds this percent (0 = off).
+  max_caps_percent: 0
+  # Punish when a message has more than this many emojis (0 = off).
+  max_emojis: 12
+  # delete | warn | mute | kick
+  punishment: "delete"
+  # Mute duration applied when punishment == mute (e.g. 10m, 1h).
+  mute_duration: "10m"
+  # Channels exempt from automod (channel IDs, per-server via /automod).
+  exempt_channels: []
+
+# ------------------------------------------------------------
+# Leveling defaults
+# ------------------------------------------------------------
+leveling:
+  enabled: true
+  # XP granted per message (random between min and max).
+  xp_min: 15
+  xp_max: 25
+  # Seconds a user must wait between XP gains (anti spam-farm).
+  xp_cooldown: 60
+  # XP formula base: xp_needed = base * (level ^ exponent)
+  xp_base: 100
+  xp_exponent: 1.5
+  # Announce level ups in the channel the message was sent in.
+  announce_level_up: true
+
+# ------------------------------------------------------------
+# Economy defaults
+# ------------------------------------------------------------
+economy:
+  enabled: true
+  currency_name: "coins"
+  currency_emoji: "🪙"
+  starting_balance: 100
+  daily_amount: 250
+  weekly_amount: 1500
+  work_min: 100
+  work_max: 500
+  # Cooldowns in seconds.
+  daily_cooldown: 86400
+  weekly_cooldown: 604800
+  work_cooldown: 3600
+  # Gambling limits.
+  min_bet: 10
+  max_bet: 10000
+
+# ------------------------------------------------------------
+# Tickets defaults
+# ------------------------------------------------------------
+tickets:
+  # Auto close tickets after this many seconds of inactivity (0 = off).
+  inactivity_timeout: 86400
+  # Maximum open tickets per user.
+  max_per_user: 1
+  # Save an HTML transcript to the log channel when a ticket closes.
+  save_transcript: true
+
+# ------------------------------------------------------------
+# Giveaways defaults
+# ------------------------------------------------------------
+giveaways:
+  # Emoji used on the join button.
+  emoji: "🎉"
+  # Mention the winner(s) when the giveaway ends.
+  mention_winners: true
+
+# ------------------------------------------------------------
+# Welcome / leave defaults
+# ------------------------------------------------------------
+welcome:
+  # Variables available: {user} {user.mention} {server} {membercount}
+  default_welcome_message: "Welcome {user.mention} to **{server}**! You are member #{membercount}."
+  default_leave_message: "**{user}** has left **{server}**."
+
+# ------------------------------------------------------------
+# Music defaults (requires yt-dlp + FFmpeg, optional)
+# ------------------------------------------------------------
+music:
+  enabled: true
+  default_volume: 50
+  max_volume: 200
+  # Disconnect after this many seconds of an empty voice channel.
+  idle_disconnect: 300
