@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Server configuration: prefix, language, module toggles, settings viewer."""
 
 from __future__ import annotations

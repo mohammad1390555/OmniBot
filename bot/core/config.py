@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Configuration loader.
 
 Reads config/config.yml and config/messages.yml once at startup and

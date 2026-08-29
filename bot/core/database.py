@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Async SQLite database layer.
 
 All persistent state (guild settings, cases, economy, leveling, tickets,

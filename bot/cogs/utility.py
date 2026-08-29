@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Utility: ping, userinfo, serverinfo, avatar, reminders, polls, snipe, afk."""
 
 from __future__ import annotations

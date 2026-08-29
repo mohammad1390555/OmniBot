@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Self-assignable roles via select menu + role management helpers."""
 
 from __future__ import annotations

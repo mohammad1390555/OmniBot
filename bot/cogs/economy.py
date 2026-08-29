@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Economy: balance, daily, weekly, work, pay, coinflip, slots, blackjack."""
 
 from __future__ import annotations

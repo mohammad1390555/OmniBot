@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Leveling: XP on messages, rank, leaderboard, level-up announcements."""
 
 from __future__ import annotations

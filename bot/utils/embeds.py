@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Embed builders with consistent branding."""
 
 from __future__ import annotations

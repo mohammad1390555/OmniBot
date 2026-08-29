@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Fun: 8ball, rps, ship, rate, dice, coin, counting game, tags."""
 
 from __future__ import annotations

@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Welcome & leave messages + autorole assignment."""
 
 from __future__ import annotations

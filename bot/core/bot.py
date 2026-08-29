@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """The OmniBot client class.
 
 Wires together config, database, i18n and cog loading.

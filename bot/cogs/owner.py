@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Owner-only tools: reload cogs, sync, shutdown, guild list."""
 
 from __future__ import annotations

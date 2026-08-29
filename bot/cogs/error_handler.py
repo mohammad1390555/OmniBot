@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Global error handling: friendly messages for every command failure."""
 
 from __future__ import annotations

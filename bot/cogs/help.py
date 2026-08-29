@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Interactive help command with a category select menu."""
 
 from __future__ import annotations

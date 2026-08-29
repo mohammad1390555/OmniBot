@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Logging: message edit/delete, joins/leaves, voice, channels, roles, nicknames."""
 
 from __future__ import annotations

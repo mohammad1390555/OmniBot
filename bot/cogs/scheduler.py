@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Scheduler: fires reminders and temp actions (unmute/unban) from the DB.
 
 Everything is database-backed, so timers survive restarts — on startup

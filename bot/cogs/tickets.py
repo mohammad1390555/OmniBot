@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Ticket system: button-opened private channels, claim, close, transcript."""
 
 from __future__ import annotations

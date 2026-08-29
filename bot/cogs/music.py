@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Music: play/pause/skip/queue/volume/loop via voice + yt-dlp.
 
 Optional module — if yt-dlp or FFmpeg is missing the cog loads but

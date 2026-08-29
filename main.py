@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """OmniBot — entry point.
 
 Run with:  python main.py

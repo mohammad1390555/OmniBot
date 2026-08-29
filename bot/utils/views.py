@@ -1,3 +1,4 @@
+# ─── Made by Mohammad — github.com/mohammad1390555 ───
 """Reusable interactive views: pagination and confirm buttons."""
 
 from __future__ import annotations
