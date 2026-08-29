@@ -1,5 +1,5 @@
 # ─── Made by Mohammad — github.com/mohammad1390555 ───
-"""Logging: message edit/delete, joins/leaves, voice, channels, roles, nicknames."""
+"""Logging: audit-log enriched tracking for messages, members, bans, voice, channels, and roles."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ class Logging(commands.Cog):
         if not channel_id:
             return
         channel = guild.get_channel(int(channel_id))
-        if channel:
+        if isinstance(channel, discord.TextChannel):
             try:
                 await channel.send(embed=embed)
             except discord.HTTPException:
@@ -32,17 +32,25 @@ class Logging(commands.Cog):
     # -- message events ------------------------------------------------
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message) -> None:
-        if message.guild is None or message.author.bot or not message.content:
+        if message.guild is None or message.author.bot:
             return
+
+        content = message.content or "(no text content)"
+        att_links = [f"[{a.filename}]({a.url})" for a in message.attachments]
+        att_str = f"\n**Attachments:** {', '.join(att_links)}" if att_links else ""
+
         # store for snipe
         await db.execute(
             "INSERT OR REPLACE INTO snipes (guild_id, channel_id, author, content, kind)"
             " VALUES (?, ?, ?, ?, 'delete')",
-            (message.guild.id, message.channel.id, str(message.author), message.content[:1900]),
+            (message.guild.id, message.channel.id, str(message.author), (content + att_str)[:1900]),
         )
+
         embed = embeds.titled(
             await self.bot.tr(message.guild.id, "log_msg_deleted", channel=message.channel.mention),
-            f"**Author:** {message.author.mention}\n**Content:**\n{message.content[:1000]}")
+            f"**Author:** {message.author.mention} (`{message.author.id}`)\n"
+            f"**Content:**\n{content[:1000]}{att_str}"
+        )
         embed.color = discord.Color.red()
         await self._send(message.guild, "message_log_channel", embed)
 
@@ -52,15 +60,20 @@ class Logging(commands.Cog):
             return
         if before.content == after.content:
             return
+
         await db.execute(
             "INSERT OR REPLACE INTO snipes (guild_id, channel_id, author, content, kind)"
             " VALUES (?, ?, ?, ?, 'edit')",
-            (before.guild.id, before.channel.id, str(before.author), before.content[:1900]),
+            (before.guild.id, before.channel.id, str(before.author), (before.content or "")[:1900]),
         )
+
         embed = embeds.titled(
             await self.bot.tr(before.guild.id, "log_msg_edited", channel=before.channel.mention),
-            f"**Author:** {before.author.mention} [Jump]({after.jump_url})\n"
-            f"**Before:** {before.content[:500]}\n**After:** {after.content[:500]}")
+            f"**Author:** {before.author.mention} [Jump to Message]({after.jump_url})\n"
+            f"**Before:**\n{before.content[:500] or '(empty)'}\n\n"
+            f"**After:**\n{after.content[:500] or '(empty)'}"
+        )
+        embed.color = discord.Color.gold()
         await self._send(before.guild, "message_log_channel", embed)
 
     # -- member events ---------------------------------------------------
@@ -68,8 +81,9 @@ class Logging(commands.Cog):
     async def on_member_join(self, member: discord.Member) -> None:
         embed = embeds.titled(
             await self.bot.tr(member.guild.id, "log_member_join"),
-            f"{member.mention} **{member}** (id: {member.id})\n"
-            f"Account created: <t:{int(member.created_at.timestamp())}:R>")
+            f"{member.mention} **{member}** (`{member.id}`)\n"
+            f"Account created: <t:{int(member.created_at.timestamp())}:R>"
+        )
         embed.color = discord.Color.green()
         embed.set_thumbnail(url=member.display_avatar.url)
         await self._send(member.guild, "member_log_channel", embed)
@@ -77,23 +91,55 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member) -> None:
         roles = ", ".join(r.mention for r in member.roles[1:][:20]) or "None"
+        moderator = ""
+        try:
+            async for entry in member.guild.audit_logs(limit=1, action=discord.AuditLogAction.kick):
+                if entry.target.id == member.id:
+                    moderator = f"\n**Kicked by:** {entry.user.mention} (Reason: `{entry.reason or 'None'}`)"
+                    break
+        except (discord.HTTPException, discord.Forbidden):
+            pass
+
         embed = embeds.titled(
             await self.bot.tr(member.guild.id, "log_member_leave"),
-            f"**{member}** (id: {member.id})\n**Roles:** {roles}")
+            f"**{member}** (`{member.id}`)\n**Roles:** {roles}{moderator}"
+        )
         embed.color = discord.Color.orange()
         await self._send(member.guild, "member_log_channel", embed)
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild: discord.Guild, user: discord.User) -> None:
-        embed = embeds.titled(await self.bot.tr(guild.id, "log_member_ban"),
-                              f"**{user}** (id: {user.id})")
+        mod_info = ""
+        try:
+            async for entry in guild.audit_logs(limit=1, action=discord.AuditLogAction.ban):
+                if entry.target.id == user.id:
+                    mod_info = f"\n**Banned by:** {entry.user.mention} — `{entry.reason or 'No reason provided'}`"
+                    break
+        except (discord.HTTPException, discord.Forbidden):
+            pass
+
+        embed = embeds.titled(
+            await self.bot.tr(guild.id, "log_member_ban"),
+            f"**{user}** (`{user.id}`){mod_info}"
+        )
         embed.color = discord.Color.red()
         await self._send(guild, "member_log_channel", embed)
 
     @commands.Cog.listener()
     async def on_member_unban(self, guild: discord.Guild, user: discord.User) -> None:
-        embed = embeds.titled(await self.bot.tr(guild.id, "log_member_unban"),
-                              f"**{user}** (id: {user.id})")
+        mod_info = ""
+        try:
+            async for entry in guild.audit_logs(limit=1, action=discord.AuditLogAction.unban):
+                if entry.target.id == user.id:
+                    mod_info = f"\n**Unbanned by:** {entry.user.mention}"
+                    break
+        except (discord.HTTPException, discord.Forbidden):
+            pass
+
+        embed = embeds.titled(
+            await self.bot.tr(guild.id, "log_member_unban"),
+            f"**{user}** (`{user.id}`){mod_info}"
+        )
         embed.color = discord.Color.green()
         await self._send(guild, "member_log_channel", embed)
 
@@ -105,11 +151,11 @@ class Logging(commands.Cog):
         if before.channel == after.channel:
             return
         if before.channel is None and after.channel is not None:
-            key, desc = "log_voice_join", f"{member.mention} → {after.channel.mention}"
+            key, desc = "log_voice_join", f"{member.mention} joined {after.channel.mention}"
         elif before.channel is not None and after.channel is None:
-            key, desc = "log_voice_leave", f"{member.mention} ← {before.channel.mention}"
+            key, desc = "log_voice_leave", f"{member.mention} left {before.channel.mention}"
         else:
-            key, desc = "log_voice_move", f"{member.mention}: {before.channel.mention} → {after.channel.mention}"
+            key, desc = "log_voice_move", f"{member.mention} moved from {before.channel.mention} to {after.channel.mention}"
         embed = embeds.titled(await self.bot.tr(member.guild.id, key), desc)
         await self._send(member.guild, "voice_log_channel", embed)
 
@@ -117,28 +163,28 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: discord.abc.GuildChannel) -> None:
         embed = embeds.titled(await self.bot.tr(channel.guild.id, "log_channel_created"),
-                              f"{channel.mention} ({channel.type})")
+                              f"{channel.mention} (`{channel.name}` — {channel.type})")
         embed.color = discord.Color.green()
         await self._send(channel.guild, "server_log_channel", embed)
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel: discord.abc.GuildChannel) -> None:
         embed = embeds.titled(await self.bot.tr(channel.guild.id, "log_channel_deleted"),
-                              f"**{channel.name}** ({channel.type})")
+                              f"**#{channel.name}** (`{channel.id}` — {channel.type})")
         embed.color = discord.Color.red()
         await self._send(channel.guild, "server_log_channel", embed)
 
     @commands.Cog.listener()
     async def on_guild_role_create(self, role: discord.Role) -> None:
         embed = embeds.titled(await self.bot.tr(role.guild.id, "log_role_created"),
-                              f"{role.mention}")
+                              f"{role.mention} (`{role.name}` — `{role.id}`)")
         embed.color = discord.Color.green()
         await self._send(role.guild, "server_log_channel", embed)
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role: discord.Role) -> None:
         embed = embeds.titled(await self.bot.tr(role.guild.id, "log_role_deleted"),
-                              f"**{role.name}**")
+                              f"**@{role.name}** (`{role.id}`)")
         embed.color = discord.Color.red()
         await self._send(role.guild, "server_log_channel", embed)
 
@@ -148,7 +194,8 @@ class Logging(commands.Cog):
         if before.nick != after.nick:
             embed = embeds.titled(
                 await self.bot.tr(after.guild.id, "log_nick_changed"),
-                f"**{after}**\nBefore: `{before.nick}`\nAfter: `{after.nick}`")
+                f"**{after}** (`{after.id}`)\n**Before:** `{before.nick or before.name}`\n**After:** `{after.nick or after.name}`"
+            )
             await self._send(after.guild, "member_log_channel", embed)
 
     # ------------------------------------------------------------------
@@ -167,8 +214,8 @@ class Logging(commands.Cog):
         lines = []
         for name, key in keys.items():
             cid = await db.get_guild_setting(ctx.guild.id, key)
-            lines.append(f"**{name}:** <#{cid}>" if cid else f"**{name}:** —")
-        await ctx.send(embed=embeds.titled("📜 Log Channels", "\n".join(lines)))
+            lines.append(f"**{name.capitalize()}:** <#{cid}>" if cid else f"**{name.capitalize()}:** —")
+        await ctx.send(embed=embeds.titled("📜 Log Channels Configuration", "\n".join(lines)))
 
     @setlog.command(name="message", description="Channel for message edit/delete logs.")
     async def setlog_message(self, ctx: commands.Context, channel: discord.TextChannel) -> None:

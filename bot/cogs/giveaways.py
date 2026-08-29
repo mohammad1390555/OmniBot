@@ -46,6 +46,8 @@ class GiveawayButton(discord.ui.View):
 class Giveaways(commands.Cog):
     def __init__(self, bot: OmniBot) -> None:
         self.bot = bot
+
+    async def cog_load(self) -> None:
         self.check_giveaways.start()
 
     def cog_unload(self) -> None:
@@ -53,6 +55,8 @@ class Giveaways(commands.Cog):
 
     @tasks.loop(seconds=15)
     async def check_giveaways(self) -> None:
+        if db._db is None:
+            return
         rows = await db.fetchall("SELECT * FROM giveaways WHERE ended = 0")
         now = utcnow()
         for row in rows:
@@ -66,7 +70,10 @@ class Giveaways(commands.Cog):
 
     @check_giveaways.before_loop
     async def before_check(self) -> None:
-        await self.bot.wait_until_ready()
+        try:
+            await self.bot.wait_until_ready()
+        except RuntimeError:
+            pass
 
     async def _end_giveaway(self, row) -> None:
         guild = self.bot.get_guild(row["guild_id"])
@@ -123,25 +130,33 @@ class Giveaways(commands.Cog):
         await ctx.send(embed=embeds.success(await self.bot.tr(
             ctx.guild.id, "giveaway_started", channel=ctx.channel.mention)), delete_after=5)
 
-    @commands.hybrid_command(name="gend", description="End a giveaway early (by message ID).")
+    @commands.hybrid_command(name="gend", description="End a giveaway early (by message ID or link).")
     @commands.guild_only()
     @module_enabled("giveaways")
     @is_mod()
-    async def gend(self, ctx: commands.Context, message_id: int) -> None:
+    async def gend(self, ctx: commands.Context, message: str) -> None:
+        try:
+            mid = int(message.split("/")[-1].strip())
+        except ValueError:
+            return await ctx.send(embed=embeds.error("Invalid message ID or link."))
         row = await db.fetchone(
-            "SELECT * FROM giveaways WHERE message_id = ? AND ended = 0", (message_id,))
+            "SELECT * FROM giveaways WHERE message_id = ? AND ended = 0", (mid,))
         if not row:
             return await ctx.send(embed=embeds.error("No active giveaway with that message ID."))
         await self._end_giveaway(row)
         await ctx.send(embed=embeds.success("Giveaway ended."))
 
-    @commands.hybrid_command(name="greroll", description="Reroll a finished giveaway's winners.")
+    @commands.hybrid_command(name="greroll", description="Reroll a finished giveaway's winners (by message ID or link).")
     @commands.guild_only()
     @module_enabled("giveaways")
     @is_mod()
-    async def greroll(self, ctx: commands.Context, message_id: int) -> None:
+    async def greroll(self, ctx: commands.Context, message: str) -> None:
+        try:
+            mid = int(message.split("/")[-1].strip())
+        except ValueError:
+            return await ctx.send(embed=embeds.error("Invalid message ID or link."))
         row = await db.fetchone(
-            "SELECT * FROM giveaways WHERE message_id = ?", (message_id,))
+            "SELECT * FROM giveaways WHERE message_id = ?", (mid,))
         if not row:
             return await ctx.send(embed=embeds.error("No giveaway with that message ID."))
         entries = json.loads(row["entries"] or "[]")

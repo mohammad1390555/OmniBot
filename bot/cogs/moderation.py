@@ -1,7 +1,9 @@
 # ─── Made by Mohammad — github.com/mohammad1390555 ───
-"""Moderation: ban, kick, mute, warn, purge, lock, slowmode, cases."""
+"""Moderation: ban, tempban, unban, kick, softban, mute, unmute, warn, unwarn, clearwarns, purge, lock, unlock, lockdown, slowmode, nick, cases."""
 
 from __future__ import annotations
+
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -11,8 +13,7 @@ from bot.core.config import config
 from bot.core.database import db
 from bot.utils import embeds
 from bot.utils.checks import is_mod, module_enabled
-from bot.utils.timeutil import discord_ts, format_duration, parse_duration, utcnow
-from bot.utils.views import ConfirmView
+from bot.utils.timeutil import discord_ts, format_duration, iso, parse_duration, utcnow
 
 
 class Moderation(commands.Cog):
@@ -35,7 +36,7 @@ class Moderation(commands.Cog):
         if not channel_id:
             return
         channel = guild.get_channel(int(channel_id))
-        if channel:
+        if isinstance(channel, discord.TextChannel):
             try:
                 await channel.send(embed=embeds.info(text))
             except discord.HTTPException:
@@ -51,7 +52,7 @@ class Moderation(commands.Cog):
     @is_mod()
     @commands.bot_has_guild_permissions(ban_members=True)
     async def ban(self, ctx: commands.Context, member: discord.Member,
-                  reason: str = "No reason provided") -> None:
+                  *, reason: str = "No reason provided") -> None:
         if member.id == ctx.author.id:
             return await ctx.send(embed=embeds.error(await self.bot.tr(ctx.guild.id, "mod_cannot_punish_self")))
         if member.id == ctx.guild.owner_id:
@@ -59,23 +60,67 @@ class Moderation(commands.Cog):
         if not self._hierarchy_ok(ctx.guild.me, member):
             return await ctx.send(embed=embeds.error(await self.bot.tr(ctx.guild.id, "mod_cannot_punish")))
 
-        await member.ban(reason=f"{ctx.author} | {reason}", delete_message_days=0)
+        try:
+            await member.ban(reason=f"{ctx.author} | {reason}", delete_message_days=0)
+        except discord.HTTPException as e:
+            return await ctx.send(embed=embeds.error(f"Failed to ban {member.mention}: {e}"))
+
         case_id = await self._log_case(ctx.guild, member.id, ctx.author, "ban", reason)
         await ctx.send(embed=embeds.success(
             await self.bot.tr(ctx.guild.id, "mod_ban_success", user=str(member))))
-        await self._notify_log(ctx.guild, f"🔨 **{member}** banned by {ctx.author} — `{reason}` (case #{case_id})")
+        await self._notify_log(ctx.guild, f"🔨 **{member}** banned by {ctx.author.mention} — `{reason}` (case #{case_id})")
 
-    @commands.hybrid_command(name="unban", description="Unban a user by ID or name#discriminator.")
+    @commands.hybrid_command(name="tempban", description="Ban a member temporarily (e.g. 1d, 7d).")
+    @commands.guild_only()
+    @module_enabled("moderation")
+    @is_mod()
+    @commands.bot_has_guild_permissions(ban_members=True)
+    async def tempban(self, ctx: commands.Context, member: discord.Member,
+                      duration: str, *, reason: str = "No reason provided") -> None:
+        delta = parse_duration(duration)
+        if delta is None:
+            return await ctx.send(embed=embeds.error("Invalid duration. Examples: `10m`, `1h`, `7d`."))
+        if member.id == ctx.author.id:
+            return await ctx.send(embed=embeds.error(await self.bot.tr(ctx.guild.id, "mod_cannot_punish_self")))
+        if member.id == ctx.guild.owner_id:
+            return await ctx.send(embed=embeds.error(await self.bot.tr(ctx.guild.id, "mod_cannot_punish_owner")))
+        if not self._hierarchy_ok(ctx.guild.me, member):
+            return await ctx.send(embed=embeds.error(await self.bot.tr(ctx.guild.id, "mod_cannot_punish")))
+
+        expires_at = utcnow() + delta
+        try:
+            await member.ban(reason=f"tempban by {ctx.author} for {duration} | {reason}", delete_message_days=0)
+        except discord.HTTPException as e:
+            return await ctx.send(embed=embeds.error(f"Failed to ban {member.mention}: {e}"))
+
+        case_id = await self._log_case(ctx.guild, member.id, ctx.author, "tempban", reason, duration)
+
+        await db.execute(
+            "INSERT INTO temp_actions (guild_id, user_id, action, expires_at) VALUES (?, ?, 'unban', ?)",
+            (ctx.guild.id, member.id, iso(expires_at)),
+        )
+        await ctx.send(embed=embeds.success(
+            f"🔨 **{member}** has been banned for **{duration}** (until {discord_ts(expires_at, 'R')})."))
+        await self._notify_log(ctx.guild, f"🔨 **{member}** tempbanned for {duration} by {ctx.author.mention} — `{reason}` (case #{case_id})")
+
+    @commands.hybrid_command(name="unban", description="Unban a user by ID.")
     @commands.guild_only()
     @module_enabled("moderation")
     @is_mod()
     @commands.bot_has_guild_permissions(ban_members=True)
     async def unban(self, ctx: commands.Context, user: discord.User,
-                    reason: str = "No reason provided") -> None:
-        await ctx.guild.unban(user, reason=f"{ctx.author} | {reason}")
-        await self._log_case(ctx.guild, user.id, ctx.author, "unban", reason)
+                    *, reason: str = "No reason provided") -> None:
+        try:
+            await ctx.guild.unban(user, reason=f"{ctx.author} | {reason}")
+        except discord.NotFound:
+            return await ctx.send(embed=embeds.error(f"User **{user}** is not in the ban list."))
+        except discord.HTTPException as e:
+            return await ctx.send(embed=embeds.error(f"Failed to unban {user}: {e}"))
+
+        case_id = await self._log_case(ctx.guild, user.id, ctx.author, "unban", reason)
         await ctx.send(embed=embeds.success(
             await self.bot.tr(ctx.guild.id, "mod_unban_success", user=str(user))))
+        await self._notify_log(ctx.guild, f"✅ **{user}** unbanned by {ctx.author.mention} — `{reason}` (case #{case_id})")
 
     @commands.hybrid_command(name="kick", description="Kick a member from the server.")
     @commands.guild_only()
@@ -83,33 +128,42 @@ class Moderation(commands.Cog):
     @is_mod()
     @commands.bot_has_guild_permissions(kick_members=True)
     async def kick(self, ctx: commands.Context, member: discord.Member,
-                   reason: str = "No reason provided") -> None:
+                   *, reason: str = "No reason provided") -> None:
         if member.id == ctx.author.id:
             return await ctx.send(embed=embeds.error(await self.bot.tr(ctx.guild.id, "mod_cannot_punish_self")))
         if not self._hierarchy_ok(ctx.guild.me, member):
             return await ctx.send(embed=embeds.error(await self.bot.tr(ctx.guild.id, "mod_cannot_punish")))
 
-        await member.kick(reason=f"{ctx.author} | {reason}")
+        try:
+            await member.kick(reason=f"{ctx.author} | {reason}")
+        except discord.HTTPException as e:
+            return await ctx.send(embed=embeds.error(f"Failed to kick {member.mention}: {e}"))
+
         case_id = await self._log_case(ctx.guild, member.id, ctx.author, "kick", reason)
         await ctx.send(embed=embeds.success(
             await self.bot.tr(ctx.guild.id, "mod_kick_success", user=str(member))))
-        await self._notify_log(ctx.guild, f"👢 **{member}** kicked by {ctx.author} — `{reason}` (case #{case_id})")
+        await self._notify_log(ctx.guild, f"👢 **{member}** kicked by {ctx.author.mention} — `{reason}` (case #{case_id})")
 
-    @commands.hybrid_command(name="softban", description="Ban then immediately unban to delete messages.")
+    @commands.hybrid_command(name="softban", description="Ban then immediately unban to delete recent messages.")
     @commands.guild_only()
     @module_enabled("moderation")
     @is_mod()
     @commands.bot_has_guild_permissions(ban_members=True)
     async def softban(self, ctx: commands.Context, member: discord.Member,
-                      reason: str = "No reason provided") -> None:
+                      *, reason: str = "No reason provided") -> None:
         if not self._hierarchy_ok(ctx.guild.me, member):
             return await ctx.send(embed=embeds.error(await self.bot.tr(ctx.guild.id, "mod_cannot_punish")))
 
-        await member.ban(reason=f"softban by {ctx.author} | {reason}", delete_message_days=1)
-        await ctx.guild.unban(member, reason="softban unban")
-        await self._log_case(ctx.guild, member.id, ctx.author, "softban", reason)
+        try:
+            await member.ban(reason=f"softban by {ctx.author} | {reason}", delete_message_days=1)
+            await ctx.guild.unban(member, reason="softban unban")
+        except discord.HTTPException as e:
+            return await ctx.send(embed=embeds.error(f"Failed to softban {member.mention}: {e}"))
+
+        case_id = await self._log_case(ctx.guild, member.id, ctx.author, "softban", reason)
         await ctx.send(embed=embeds.success(
             await self.bot.tr(ctx.guild.id, "mod_softban_success", user=str(member))))
+        await self._notify_log(ctx.guild, f"🔨 **{member}** softbanned by {ctx.author.mention} — `{reason}` (case #{case_id})")
 
     @commands.hybrid_command(name="mute", description="Timeout a member (e.g. 10m, 1h, 1d).")
     @commands.guild_only()
@@ -125,10 +179,15 @@ class Moderation(commands.Cog):
             return await ctx.send(embed=embeds.error(await self.bot.tr(ctx.guild.id, "mod_cannot_punish")))
 
         until = utcnow() + delta
-        await member.timeout(delta, reason=f"{ctx.author} | {reason}")
-        await self._log_case(ctx.guild, member.id, ctx.author, "mute", reason, duration)
+        try:
+            await member.timeout(delta, reason=f"{ctx.author} | {reason}")
+        except discord.HTTPException as e:
+            return await ctx.send(embed=embeds.error(f"Failed to timeout {member.mention}: {e}"))
+
+        case_id = await self._log_case(ctx.guild, member.id, ctx.author, "mute", reason, duration)
         await ctx.send(embed=embeds.success(await self.bot.tr(
             ctx.guild.id, "mod_timeout_success", user=str(member), until=discord_ts(until, "R"))))
+        await self._notify_log(ctx.guild, f"🔇 **{member}** timed out for {duration} by {ctx.author.mention} — `{reason}` (case #{case_id})")
 
     @commands.hybrid_command(name="unmute", description="Remove a timeout from a member.")
     @commands.guild_only()
@@ -136,10 +195,15 @@ class Moderation(commands.Cog):
     @is_mod()
     @commands.bot_has_guild_permissions(moderate_members=True)
     async def unmute(self, ctx: commands.Context, member: discord.Member) -> None:
-        await member.timeout(None, reason=f"unmute by {ctx.author}")
-        await self._log_case(ctx.guild, member.id, ctx.author, "unmute", "Manual unmute")
+        try:
+            await member.timeout(None, reason=f"unmute by {ctx.author}")
+        except discord.HTTPException as e:
+            return await ctx.send(embed=embeds.error(f"Failed to unmute {member.mention}: {e}"))
+
+        case_id = await self._log_case(ctx.guild, member.id, ctx.author, "unmute", "Manual unmute")
         await ctx.send(embed=embeds.success(
             await self.bot.tr(ctx.guild.id, "mod_unmute_success", user=str(member))))
+        await self._notify_log(ctx.guild, f"🔊 **{member}** unmuted by {ctx.author.mention} (case #{case_id})")
 
     @commands.hybrid_command(name="warn", description="Warn a member (DM + logged).")
     @commands.guild_only()
@@ -164,9 +228,36 @@ class Moderation(commands.Cog):
                 ctx.guild.id, "mod_warn_dm", server=ctx.guild.name, reason=reason))
         except discord.HTTPException:
             pass
-        await self._log_case(ctx.guild, member.id, ctx.author, "warn", reason)
+        case_id = await self._log_case(ctx.guild, member.id, ctx.author, "warn", reason)
         await ctx.send(embed=embeds.success(await self.bot.tr(
             ctx.guild.id, "mod_warn_success", user=str(member), count=count)))
+        await self._notify_log(ctx.guild, f"⚠️ **{member}** warned by {ctx.author.mention} — `{reason}` (warn #{count}, case #{case_id})")
+
+    @commands.hybrid_command(name="unwarn", description="Remove a specific warning by its ID.")
+    @commands.guild_only()
+    @module_enabled("moderation")
+    @is_mod()
+    async def unwarn(self, ctx: commands.Context, member: discord.Member, warning_id: int) -> None:
+        row = await db.fetchone(
+            "SELECT * FROM warnings WHERE id = ? AND guild_id = ? AND user_id = ?",
+            (warning_id, ctx.guild.id, member.id),
+        )
+        if not row:
+            return await ctx.send(embed=embeds.error(f"Warning #{warning_id} not found for {member.mention}."))
+        await db.execute("DELETE FROM warnings WHERE id = ?", (warning_id,))
+        await ctx.send(embed=embeds.success(
+            await self.bot.tr(ctx.guild.id, "mod_unwarn_success", id=warning_id, user=str(member))))
+
+    @commands.hybrid_command(name="clearwarns", description="Clear all warnings for a member.")
+    @commands.guild_only()
+    @module_enabled("moderation")
+    @is_mod()
+    async def clearwarns(self, ctx: commands.Context, member: discord.Member) -> None:
+        await db.execute(
+            "DELETE FROM warnings WHERE guild_id = ? AND user_id = ?",
+            (ctx.guild.id, member.id),
+        )
+        await ctx.send(embed=embeds.success(f"Cleared all warnings for **{member}**."))
 
     @commands.hybrid_command(name="warnings", description="View a member's warning history.")
     @commands.guild_only()
@@ -203,7 +294,13 @@ class Moderation(commands.Cog):
                     member: discord.Member | None = None) -> None:
         max_purge = int(config.get("moderation.max_purge", 500))
         amount = max(1, min(amount, max_purge))
-        await ctx.message.delete()
+
+        # Safe message deletion for text command invocations
+        if ctx.message:
+            try:
+                await ctx.message.delete()
+            except discord.HTTPException:
+                pass
 
         def check(m: discord.Message) -> bool:
             return member is None or m.author.id == member.id
@@ -211,7 +308,7 @@ class Moderation(commands.Cog):
         deleted = await ctx.channel.purge(limit=amount, check=check)
         msg = await ctx.send(embed=embeds.success(
             await self.bot.tr(ctx.guild.id, "mod_purge_success", count=len(deleted))))
-        await discord.utils.sleep_delay(3)
+        await asyncio.sleep(3)
         try:
             await msg.delete()
         except discord.HTTPException:
@@ -279,7 +376,11 @@ class Moderation(commands.Cog):
     @commands.bot_has_guild_permissions(manage_nicknames=True)
     async def nick(self, ctx: commands.Context, member: discord.Member,
                    *, nickname: str | None = None) -> None:
-        await member.edit(nick=nickname, reason=f"nick by {ctx.author}")
+        try:
+            await member.edit(nick=nickname, reason=f"nick by {ctx.author}")
+        except discord.HTTPException as e:
+            return await ctx.send(embed=embeds.error(f"Failed to change nickname: {e}"))
+
         if nickname:
             await ctx.send(embed=embeds.success(await self.bot.tr(
                 ctx.guild.id, "mod_nick_set", user=str(member), nick=nickname)))

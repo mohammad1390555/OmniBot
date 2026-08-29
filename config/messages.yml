@@ -23,8 +23,8 @@ en:
   reason_none: "No reason provided"
 
   # ---------- help ----------
-  help_title: "📚 OmniBot Help"
-  help_description: "Choose a category below to see its commands."
+  help_title: "📚 OmniBot Help Center"
+  help_description: "Choose a category below to see its available commands."
   help_footer: "OmniBot • All-in-One Discord Bot"
 
   # ---------- moderation ----------
@@ -58,6 +58,8 @@ en:
   automod_reason_word: "banned word"
   automod_reason_invite: "invite link"
   automod_reason_link: "link"
+  automod_reason_phishing: "phishing / scam link"
+  automod_reason_spam: "excessive spam"
   automod_reason_mentions: "too many mentions"
   automod_reason_caps: "too many caps"
   automod_reason_emoji: "too many emojis"
@@ -195,7 +197,7 @@ fa:
   reason_none: "دلیلی ذکر نشده"
 
   # ---------- help ----------
-  help_title: "📚 راهنمای OmniBot"
+  help_title: "📚 راهنمای جامع OmniBot"
   help_description: "یک دسته را از منوی زیر انتخاب کنید تا دستوراتش را ببینید."
   help_footer: "OmniBot • ربات همه‌کاره دیسکورد"
 
@@ -230,6 +232,8 @@ fa:
   automod_reason_word: "کلمه ممنوعه"
   automod_reason_invite: "لینک دعوت"
   automod_reason_link: "لینک"
+  automod_reason_phishing: "لینک فیشینگ و کلاهبرداری"
+  automod_reason_spam: "اسپم پیام"
   automod_reason_mentions: "منشن بیش از حد"
   automod_reason_caps: "حروف بزرگ بیش از حد"
   automod_reason_emoji: "ایموجی بیش از حد"

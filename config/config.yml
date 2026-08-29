@@ -26,10 +26,10 @@ bot:
   # Branding used across every embed the bot sends.
   branding:
     name: "OmniBot"
-    version: "1.0.0"
+    version: "2.0.0"
     # Hex color used for all embeds unless overridden.
     color: "#5865F2"
-    footer_text: "OmniBot • All-in-One"
+    footer_text: "OmniBot • All-in-One Discord Bot"
     # Optional thumbnail / banner URLs.
     thumbnail_url: ""
     banner_url: ""
@@ -71,6 +71,8 @@ modules:
   welcome: true
   roles: true
   music: true
+  starboard: true
+  birthdays: true
 
 # ------------------------------------------------------------
 # Moderation defaults
@@ -92,13 +94,20 @@ automod:
   banned_words: []
   block_invite_links: true
   block_all_links: false
+  block_phishing: true
+  # Anti-spam filter
+  anti_spam: true
+  spam_rate: 5
+  spam_per: 5
+  # Anti-ghostping
+  anti_ghostping: true
   # Punish when a message has more than this many user mentions (0 = off).
   max_mentions: 8
   # Punish when caps ratio exceeds this percent (0 = off).
   max_caps_percent: 0
   # Punish when a message has more than this many emojis (0 = off).
   max_emojis: 12
-  # delete | warn | mute | kick
+  # delete | warn | mute | kick | ban
   punishment: "delete"
   # Mute duration applied when punishment == mute (e.g. 10m, 1h).
   mute_duration: "10m"
@@ -142,6 +151,13 @@ economy:
   max_bet: 10000
 
 # ------------------------------------------------------------
+# Starboard defaults
+# ------------------------------------------------------------
+starboard:
+  enabled: true
+  threshold: 3
+
+# ------------------------------------------------------------
 # Tickets defaults
 # ------------------------------------------------------------
 tickets:
@@ -149,7 +165,7 @@ tickets:
   inactivity_timeout: 86400
   # Maximum open tickets per user.
   max_per_user: 1
-  # Save an HTML transcript to the log channel when a ticket closes.
+  # Save an HTML/Text transcript to the log channel when a ticket closes.
   save_transcript: true
 
 # ------------------------------------------------------------

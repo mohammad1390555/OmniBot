@@ -1,19 +1,22 @@
 # ─── Made by Mohammad — github.com/mohammad1390555 ───
-"""Async SQLite database layer.
+"""Async SQLite database layer with in-memory caching and robust indexing.
 
 All persistent state (guild settings, cases, economy, leveling, tickets,
-giveaways, reminders, timers) lives here so everything survives restarts.
+giveaways, reminders, timers, shop, starboard, birthdays) lives here so everything survives restarts.
 """
 
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
 import aiosqlite
 
 from .config import config
+
+log = logging.getLogger("omnibot.database")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS guilds (
@@ -48,10 +51,29 @@ CREATE TABLE IF NOT EXISTS economy (
     guild_id    INTEGER NOT NULL,
     user_id     INTEGER NOT NULL,
     balance     INTEGER DEFAULT 0,
+    bank        INTEGER DEFAULT 0,
     last_daily  TEXT,
     last_weekly TEXT,
     last_work   TEXT,
+    last_rob    TEXT,
     PRIMARY KEY (guild_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS shop_items (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id    INTEGER NOT NULL,
+    name        TEXT NOT NULL,
+    description TEXT,
+    price       INTEGER NOT NULL,
+    role_id     INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS user_inventory (
+    guild_id    INTEGER NOT NULL,
+    user_id     INTEGER NOT NULL,
+    item_id     INTEGER NOT NULL,
+    quantity    INTEGER DEFAULT 1,
+    PRIMARY KEY (guild_id, user_id, item_id)
 );
 
 CREATE TABLE IF NOT EXISTS leveling (
@@ -62,6 +84,13 @@ CREATE TABLE IF NOT EXISTS leveling (
     messages    INTEGER DEFAULT 0,
     last_xp     TEXT,
     PRIMARY KEY (guild_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS level_roles (
+    guild_id    INTEGER NOT NULL,
+    level       INTEGER NOT NULL,
+    role_id     INTEGER NOT NULL,
+    PRIMARY KEY (guild_id, level)
 );
 
 CREATE TABLE IF NOT EXISTS tickets (
@@ -136,6 +165,7 @@ CREATE TABLE IF NOT EXISTS birthdays (
     user_id     INTEGER NOT NULL,
     month       INTEGER NOT NULL,
     day         INTEGER NOT NULL,
+    last_celebrated TEXT,
     PRIMARY KEY (guild_id, user_id)
 );
 
@@ -172,14 +202,24 @@ CREATE TABLE IF NOT EXISTS snipes (
     at          TEXT DEFAULT (datetime('now')),
     PRIMARY KEY (guild_id, channel_id, kind)
 );
+
+-- Performance Indices
+CREATE INDEX IF NOT EXISTS idx_cases_guild_user ON cases (guild_id, user_id);
+CREATE INDEX IF NOT EXISTS idx_warnings_guild_user ON warnings (guild_id, user_id);
+CREATE INDEX IF NOT EXISTS idx_reminders_status ON reminders (done, remind_at);
+CREATE INDEX IF NOT EXISTS idx_temp_actions_status ON temp_actions (done, expires_at);
+CREATE INDEX IF NOT EXISTS idx_giveaways_active ON giveaways (ended, ends_at);
+CREATE INDEX IF NOT EXISTS idx_economy_lb ON economy (guild_id, balance DESC);
+CREATE INDEX IF NOT EXISTS idx_leveling_lb ON leveling (guild_id, xp DESC);
 """
 
 
 class Database:
-    """Thin async wrapper around aiosqlite with JSON helpers."""
+    """Async wrapper around aiosqlite with JSON helpers and guild memory cache."""
 
     def __init__(self) -> None:
         self._db: aiosqlite.Connection | None = None
+        self._guild_cache: dict[int, dict[str, Any]] = {}
 
     async def connect(self) -> None:
         path = Path(config.sqlite_path)
@@ -187,11 +227,28 @@ class Database:
         self._db = await aiosqlite.connect(path)
         self._db.row_factory = aiosqlite.Row
         await self._db.executescript(SCHEMA)
+        # Migrate columns safely if needed (e.g. bank in economy)
+        try:
+            await self._db.execute("ALTER TABLE economy ADD COLUMN bank INTEGER DEFAULT 0")
+            await self._db.commit()
+        except Exception:
+            pass
+        try:
+            await self._db.execute("ALTER TABLE economy ADD COLUMN last_rob TEXT")
+            await self._db.commit()
+        except Exception:
+            pass
+        try:
+            await self._db.execute("ALTER TABLE birthdays ADD COLUMN last_celebrated TEXT")
+            await self._db.commit()
+        except Exception:
+            pass
         await self._db.commit()
 
     async def close(self) -> None:
         if self._db:
             await self._db.close()
+            self._db = None
 
     @property
     def db(self) -> aiosqlite.Connection:
@@ -212,32 +269,65 @@ class Database:
         cur = await self.db.execute(sql, params)
         return await cur.fetchall()
 
-    # -- guild settings ----------------------------------------------
+    # -- guild settings with cache -----------------------------------
     async def ensure_guild(self, guild_id: int) -> None:
         await self.execute(
             "INSERT OR IGNORE INTO guilds (guild_id) VALUES (?)", (guild_id,)
         )
 
     async def get_guild(self, guild_id: int) -> dict[str, Any]:
+        if guild_id in self._guild_cache:
+            return self._guild_cache[guild_id]
+
         await self.ensure_guild(guild_id)
         row = await self.fetchone(
             "SELECT * FROM guilds WHERE guild_id = ?", (guild_id,)
         )
-        return {
-            "guild_id": row["guild_id"],
-            "prefix": row["prefix"],
-            "language": row["language"] or config.default_language,
-            "modules": json.loads(row["modules"] or "{}"),
-            "settings": json.loads(row["settings"] or "{}"),
-        }
+        if not row:
+            data = {
+                "guild_id": guild_id,
+                "prefix": None,
+                "language": config.default_language,
+                "modules": {},
+                "settings": {},
+            }
+        else:
+            modules_raw = row["modules"] or "{}"
+            settings_raw = row["settings"] or "{}"
+            try:
+                modules = json.loads(modules_raw) if isinstance(modules_raw, str) else dict(modules_raw)
+            except Exception:
+                modules = {}
+            try:
+                settings = json.loads(settings_raw) if isinstance(settings_raw, str) else dict(settings_raw)
+            except Exception:
+                settings = {}
+
+            data = {
+                "guild_id": row["guild_id"],
+                "prefix": row["prefix"],
+                "language": row["language"] or config.default_language,
+                "modules": modules,
+                "settings": settings,
+            }
+
+        self._guild_cache[guild_id] = data
+        return data
+
+    def invalidate_guild_cache(self, guild_id: int) -> None:
+        self._guild_cache.pop(guild_id, None)
 
     async def set_guild_field(self, guild_id: int, field: str, value: Any) -> None:
         await self.ensure_guild(guild_id)
-        if field in ("modules", "settings"):
-            value = json.dumps(value)
+        db_val = json.dumps(value) if field in ("modules", "settings") else value
         await self.execute(
-            f"UPDATE guilds SET {field} = ? WHERE guild_id = ?", (value, guild_id)
+            f"UPDATE guilds SET {field} = ? WHERE guild_id = ?", (db_val, guild_id)
         )
+        # Update cache directly
+        if guild_id in self._guild_cache:
+            self._guild_cache[guild_id][field] = value
+        else:
+            self.invalidate_guild_cache(guild_id)
 
     async def set_guild_setting(self, guild_id: int, key: str, value: Any) -> None:
         g = await self.get_guild(guild_id)

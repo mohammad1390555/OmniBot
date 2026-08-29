@@ -21,6 +21,8 @@ from bot.utils.timeutil import from_iso, utcnow
 class Scheduler(commands.Cog):
     def __init__(self, bot: OmniBot) -> None:
         self.bot = bot
+
+    async def cog_load(self) -> None:
         self.tick.start()
 
     def cog_unload(self) -> None:
@@ -28,13 +30,18 @@ class Scheduler(commands.Cog):
 
     @tasks.loop(seconds=30)
     async def tick(self) -> None:
+        if db._db is None:
+            return
         now = utcnow()
         await self._process_reminders(now)
         await self._process_temp_actions(now)
 
     @tick.before_loop
     async def before_tick(self) -> None:
-        await self.bot.wait_until_ready()
+        try:
+            await self.bot.wait_until_ready()
+        except RuntimeError:
+            pass
 
     async def _process_reminders(self, now) -> None:
         rows = await db.fetchall("SELECT * FROM reminders WHERE done = 0")

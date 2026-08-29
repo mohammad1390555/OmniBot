@@ -3,7 +3,7 @@
 # 🤖 OmniBot
 ### The All-in-One Production Discord Bot
 
-Moderation • AutoMod • Logging • Tickets • Giveaways • Leveling • Economy • Music • Fun
+Moderation • AutoMod • Logging • Tickets • Giveaways • Leveling • Economy & Shop • Music • Starboard • Birthdays • Fun
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![discord.py](https://img.shields.io/badge/discord.py-2.x-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discordpy.readthedocs.io)
@@ -17,22 +17,24 @@ Moderation • AutoMod • Logging • Tickets • Giveaways • Leveling • Ec
 
 | Module | What it does |
 |---|---|
-| 🔨 **Moderation** | ban, unban, kick, softban, mute/timeout, warn system, purge, lock/lockdown, slowmode, nicknames, case logging, mod history |
-| 🛡️ **AutoMod** | word filter, invite/link blocking, mention/caps/emoji limits, configurable punishments (delete → mute → kick → ban) |
-| 📜 **Logging** | message edit/delete, join/leave, bans, voice, channel/role create/delete, nickname changes — each routed to its own channel |
-| 🧰 **Utility** | ping, userinfo, serverinfo, avatar, banner, roleinfo, channelinfo, botinfo, reminders, polls, snipe/editsnipe, AFK, suggestions |
-| 🪙 **Economy** | balance, daily, weekly, work, pay, coinflip, slots, leaderboard, admin money tools |
-| 📈 **Leveling** | XP on messages (anti-spam cooldown), rank card with progress bar, server XP leaderboard, level-up announcements |
-| 🎫 **Tickets** | button-opened private channels, claim, close with text transcript, per-user limits |
+| 🔨 **Moderation** | ban, tempban, unban, kick, softban, mute/timeout, warn/unwarn/clearwarns, purge, lock/unlock/lockdown, slowmode, nicknames, case logging |
+| 🛡️ **AutoMod** | anti-spam rate limiter, anti-phishing/scam filter, anti-ghostping detection, word filter, invite/link blocking, caps/mention/emoji limits |
+| 📜 **Logging** | audit-log enriched tracking for message edit/delete (with attachments), join/leave, bans/unbans, voice states, channels, roles, nicknames |
+| 🧰 **Utility** | ping, userinfo, serverinfo, avatar, banner, servericon, roleinfo, channelinfo, botinfo, math/calc, translate, reminders, polls, snipe/editsnipe, AFK, suggestions |
+| 🪙 **Economy & Shop** | balance (wallet & bank), deposit/withdraw, daily, weekly, work, rob, pay, coinflip, slots, blackjack (interactive 21), server shop, item inventory |
+| 📈 **Leveling** | text XP, active Voice XP, visual rank card with progress bar, server leaderboard, automated Level Role rewards |
+| 🎫 **Tickets** | button-opened private channels, claim, add/remove user, close with detailed text transcript, per-user limits |
+| ⭐ **Starboard** | pin popular messages reacting with ⭐, configurable threshold and channel |
+| 🎂 **Birthdays** | member birthday registration, countdown, automated daily celebration announcements |
 | 🎉 **Giveaways** | button entry, timed auto-end, reroll, active list — restart-safe |
-| 👋 **Welcome** | customizable welcome/leave messages with variables, autorole |
-| 🎭 **Roles** | self-assignable roles via dropdown menu |
-| 🎲 **Fun** | 8ball, rps, ship, rate, dice, coin, counting game with cheat detection, custom tags |
-| 🎵 **Music** | play/pause/skip/stop/queue/volume/loop/shuffle/nowplaying (yt-dlp + FFmpeg) |
-| ⚙️ **Config** | per-server prefix, language, module toggles, channel settings |
-| ⏰ **Scheduler** | reminders + temp actions, all database-backed — survives restarts |
+| 👋 **Welcome** | customizable welcome/leave messages with variables, autoroles |
+| 🎭 **Roles** | self-assignable roles via interactive dropdown menu |
+| 🎲 **Fun** | 8ball, rps, ship, rate, dice, coin, choose, trivia (interactive buttons), memes, counting game, custom tags |
+| 🎵 **Music** | play, pause, resume, skip, stop, queue, volume, loop, shuffle, nowplaying with interactive Controller UI (yt-dlp + FFmpeg) |
+| ⚙️ **Config** | per-server prefix, language (EN/FA), module toggles, channel settings, in-memory caching |
+| ⏰ **Scheduler** | reminders, tempbans, and temp mutes — all database-backed and persistent across restarts |
 
-**77 commands** across 17 modules. Every module can be enabled/disabled per server.
+**90+ commands** across 19 modules. Every module can be enabled/disabled per server.
 
 ## 🌐 Multi-Language
 
@@ -57,19 +59,20 @@ OmniBot/
 │   ├── core/
 │   │   ├── bot.py           # OmniBot client class
 │   │   ├── config.py        # YAML config loader + i18n
-│   │   └── database.py      # async SQLite layer (all persistence)
+│   │   └── database.py      # async SQLite layer + in-memory caching & indexing
 │   ├── utils/
 │   │   ├── embeds.py        # branded embed builders
 │   │   ├── checks.py        # permission + module checks
 │   │   ├── timeutil.py      # duration parsing/formatting
 │   │   └── views.py         # pagination + confirm buttons
-│   └── cogs/                # 17 feature modules
+│   └── cogs/                # 19 feature modules
 │       ├── moderation.py  automod.py     logging.py
 │       ├── utility.py     economy.py     leveling.py
 │       ├── tickets.py     giveaways.py   welcome.py
 │       ├── roles.py       fun.py         music.py
-│       ├── config.py      help.py        scheduler.py
-│       ├── owner.py       error_handler.py
+│       ├── starboard.py   birthdays.py   config.py
+│       ├── help.py        scheduler.py   owner.py
+│       └── error_handler.py
 └── data/                    # runtime: SQLite DB + logs (auto-created)
 ```
 
