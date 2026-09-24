@@ -226,8 +226,8 @@ class Utility(commands.Cog):
                 from bot.utils.timeutil import from_iso
                 dur = format_duration(utcnow() - from_iso(row["since"]))
             except Exception:
-            logger.exception("Unhandled exception")
-            dur = "?"
+                logger.exception("Unhandled exception")
+                dur = "?"
             await message.channel.send(embed=embeds.info(await self.bot.tr(
                 message.guild.id, "util_afk_back", user=message.author.mention, duration=dur)))
 
@@ -243,8 +243,8 @@ class Utility(commands.Cog):
                 try:
                     since = discord_ts(from_iso(mrow["since"]), "R")
                 except Exception:
-            logger.exception("Unhandled exception")
-            since = "?"
+                    logger.exception("Unhandled exception")
+                    since = "?"
                 await message.channel.send(embed=embeds.info(await self.bot.tr(
                     message.guild.id, "util_afk_mention", user=str(mentioned),
                     reason=mrow["reason"], since=since)))

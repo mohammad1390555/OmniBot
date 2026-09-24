@@ -168,8 +168,8 @@ class Giveaways(commands.Cog):
             try:
                 ends = discord_ts(from_iso(r["ends_at"]), "R")
             except Exception:
-            logger.exception("Unhandled exception")
-            ends = "?"
+                logger.exception("Unhandled exception")
+                ends = "?"
             lines.append(f"🎉 **{r['prize']}** — {ends} — [jump](https://discord.com/channels/{r['guild_id']}/{r['channel_id']}/{r['message_id']})")
         await ctx.send(embed=embeds.titled("🎉 Active Giveaways", "\n".join(lines)))
 

@@ -53,8 +53,7 @@ class Leveling(commands.Cog):
                 if (utcnow() - from_iso(data["last_xp"])).total_seconds() < cooldown:
                     return
             except Exception:
-            logger.exception("Unhandled exception")
-            logger.exception("Unhandled exception")
+                logger.exception("Unhandled exception")
 
         gain = random.randint(int(config.get("leveling.xp_min", 15)),
                               int(config.get("leveling.xp_max", 25)))
