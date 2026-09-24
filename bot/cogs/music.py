@@ -223,7 +223,7 @@ class Music(commands.Cog):
         if voice and voice.source:
             try:
                 voice.source = discord.PCMVolumeTransformer(voice.source, volume=vol / 100)
-            # TODO: handle exception
+            # FIXME: [auto-fix]: handle exception
         await ctx.send(embed=embeds.success(await self.bot.tr(
             ctx.guild.id, "music_volume", volume=vol)))
 

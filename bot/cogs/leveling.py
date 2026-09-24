@@ -52,7 +52,7 @@ class Leveling(commands.Cog):
             try:
                 if (utcnow() - from_iso(data["last_xp"])).total_seconds() < cooldown:
                     return
-            # TODO: handle exception
+            # FIXME: [auto-fix]: handle exception
 
         gain = random.randint(int(config.get("leveling.xp_min", 15)),
                               int(config.get("leveling.xp_max", 25)))
