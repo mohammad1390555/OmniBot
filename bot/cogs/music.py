@@ -58,8 +58,7 @@ class Music(commands.Cog):
             return "Music requires `yt-dlp`. Install it: `pip install yt-dlp PyNaCl`"
         if shutil.which("ffmpeg") is None:
             return "Music requires **FFmpeg** installed and on PATH."
-        return None
-
+        
     async def _extract(self, query: str) -> Track | None:
         opts = {"quiet": True, "no_warnings": True, "noplaylist": True,
                 "format": "bestaudio/best"}
@@ -68,10 +67,8 @@ class Music(commands.Cog):
             info = await loop.run_in_executor(
                 None, lambda: yt_dlp.YoutubeDL(opts).extract_info(query, download=False))
         except Exception:
-            return None
-        if not info:
-            return None
-        if "entries" in info:
+                    if not info:
+                    if "entries" in info:
             info = info["entries"][0]
         return Track(
             title=info.get("title", "Unknown"),
@@ -226,8 +223,7 @@ class Music(commands.Cog):
         if voice and voice.source:
             try:
                 voice.source = discord.PCMVolumeTransformer(voice.source, volume=vol / 100)
-            except Exception:
-                pass
+            # TODO: handle exception
         await ctx.send(embed=embeds.success(await self.bot.tr(
             ctx.guild.id, "music_volume", volume=vol)))
 
