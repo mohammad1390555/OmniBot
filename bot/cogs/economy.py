@@ -49,17 +49,14 @@ class Economy(commands.Cog):
             (guild_id, user_id),
         )
         if not row or not row["last"]:
-            return None
-        try:
+                    try:
             last = from_iso(row["last"])
         except Exception:
-            return None
-        diff = (utcnow() - last).total_seconds()
+                    diff = (utcnow() - last).total_seconds()
         if diff < cooldown:
             from datetime import timedelta
             return format_duration(timedelta(seconds=cooldown - diff))
-        return None
-
+        
     async def _stamp(self, guild_id: int, user_id: int, field: str) -> None:
         from bot.utils.timeutil import iso
         await db.execute(
