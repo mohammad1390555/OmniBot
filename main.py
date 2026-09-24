@@ -19,13 +19,13 @@ from bot.core.config import config        # noqa: E402
 
 
 def setup_logging() -> None:
-    level = getattr(logging, str(config.get("logging.level", "INFO")).upper(), logging.INFO)
-    handlers: list[logging.Handler] = [logging.StreamHandler()]
-    log_file = config.get("logging.file")
+    level = getattr(logging, str(config.get("# # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.level", "INFO")).upper(), # # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.INFO)
+    handlers: list[# # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.Handler] = [# # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.StreamHandler()]
+    log_file = config.get("# # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.file")
     if log_file:
         Path(log_file).parent.mkdir(parents=True, exist_ok=True)
-        handlers.append(logging.FileHandler(log_file, encoding="utf-8"))
-    logging.basicConfig(
+        handlers.append(# # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.FileHandler(log_file, encoding="utf-8"))
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.basicConfig(
         level=level,
         format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
         handlers=handlers,
@@ -34,7 +34,7 @@ def setup_logging() -> None:
 
 def main() -> None:
     setup_logging()
-    log = logging.getLogger("omnibot")
+    log = # # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.getLogger("omnibot")
 
     token = config.token
     if not token:
