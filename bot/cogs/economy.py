@@ -15,6 +15,8 @@ from bot.core.database import db
 from bot.utils import embeds
 from bot.utils.checks import is_admin, module_enabled
 from bot.utils.timeutil import format_duration, from_iso, utcnow
+import logging
+log = logging.getLogger(__name__)
 
 
 class Economy(commands.Cog):
@@ -53,6 +55,7 @@ class Economy(commands.Cog):
         try:
             last = from_iso(row["last"])
         except Exception:
+            log.exception("Failed to parse last activity timestamp")
             return None
         diff = (utcnow() - last).total_seconds()
         if diff < cooldown:

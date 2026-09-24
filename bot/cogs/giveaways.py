@@ -59,7 +59,8 @@ class Giveaways(commands.Cog):
             try:
                 ends_at = from_iso(row["ends_at"])
             except Exception:
-                continue
+            logger.exception("Unhandled exception")
+            continue
             if ends_at > now:
                 continue
             await self._end_giveaway(row)
@@ -167,7 +168,8 @@ class Giveaways(commands.Cog):
             try:
                 ends = discord_ts(from_iso(r["ends_at"]), "R")
             except Exception:
-                ends = "?"
+            logger.exception("Unhandled exception")
+            ends = "?"
             lines.append(f"🎉 **{r['prize']}** — {ends} — [jump](https://discord.com/channels/{r['guild_id']}/{r['channel_id']}/{r['message_id']})")
         await ctx.send(embed=embeds.titled("🎉 Active Giveaways", "\n".join(lines)))
 

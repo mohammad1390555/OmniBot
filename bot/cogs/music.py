@@ -68,6 +68,7 @@ class Music(commands.Cog):
             info = await loop.run_in_executor(
                 None, lambda: yt_dlp.YoutubeDL(opts).extract_info(query, download=False))
         except Exception:
+            logger.exception("Unhandled exception")
             return None
         if not info:
             return None
@@ -227,7 +228,8 @@ class Music(commands.Cog):
             try:
                 voice.source = discord.PCMVolumeTransformer(voice.source, volume=vol / 100)
             except Exception:
-                pass
+            logger.exception("Unhandled exception")
+            logger.exception("Unhandled exception")
         await ctx.send(embed=embeds.success(await self.bot.tr(
             ctx.guild.id, "music_volume", volume=vol)))
 

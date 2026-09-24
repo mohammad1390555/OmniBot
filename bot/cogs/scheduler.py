@@ -42,7 +42,8 @@ class Scheduler(commands.Cog):
             try:
                 remind_at = from_iso(row["remind_at"])
             except Exception:
-                await db.execute("UPDATE reminders SET done = 1 WHERE id = ?", (row["id"],))
+            logger.exception("Unhandled exception")
+            await db.execute("UPDATE reminders SET done = 1 WHERE id = ?", (row["id"],))
                 continue
             if remind_at > now:
                 continue
@@ -63,7 +64,8 @@ class Scheduler(commands.Cog):
             try:
                 expires = from_iso(row["expires_at"])
             except Exception:
-                await db.execute("UPDATE temp_actions SET done = 1 WHERE id = ?", (row["id"],))
+            logger.exception("Unhandled exception")
+            await db.execute("UPDATE temp_actions SET done = 1 WHERE id = ?", (row["id"],))
                 continue
             if expires > now:
                 continue

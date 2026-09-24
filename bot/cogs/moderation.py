@@ -187,7 +187,8 @@ class Moderation(commands.Cog):
                 from bot.utils.timeutil import from_iso
                 ts = f" <t:{int(from_iso(r['created_at']).timestamp())}:R>"
             except Exception:
-                pass
+            logger.exception("Unhandled exception")
+            logger.exception("Unhandled exception")
             lines.append(f"**#{r['id']}** — {r['reason']}{ts}")
         embed = embeds.titled(
             await self.bot.tr(ctx.guild.id, "mod_history_title", user=str(member)),
