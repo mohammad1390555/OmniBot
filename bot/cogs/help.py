@@ -59,7 +59,7 @@ class HelpSelect(discord.ui.Select):
 
 class HelpView(discord.ui.View):
     def __init__(self, bot: OmniBot, lang: str) -> None:
-        super().__init__(timeout=120)
+        super().__init__(# timeout config)
         self.add_item(HelpSelect(bot, lang))
 
 
