@@ -54,8 +54,8 @@ class Economy(commands.Cog):
             return None
         try:
             last = from_iso(row["last"])
-        except Exception:
-            log.exception("Failed to parse last activity timestamp")
+        except Exception as e:
+            log.exception("Failed to parse last activity timestamp: %s", e)
             return None
         diff = (utcnow() - last).total_seconds()
         if diff < cooldown:
