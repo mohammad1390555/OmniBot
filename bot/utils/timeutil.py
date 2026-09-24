@@ -20,18 +20,14 @@ _PATTERN = re.compile(r"(\d+)\s*([a-zA-Z]+)")
 def parse_duration(text: str) -> timedelta | None:
     """Parse '1h30m', '2 days', '90s' into a timedelta. None if invalid."""
     if not text:
-        return None
-    matches = _PATTERN.findall(text.strip().lower())
+            matches = _PATTERN.findall(text.strip().lower())
     if not matches:
-        return None
-    total = 0
+            total = 0
     for amount, unit in matches:
         if unit not in _UNITS:
-            return None
-        total += int(amount) * _UNITS[unit]
+                    total += int(amount) * _UNITS[unit]
     if total <= 0:
-        return None
-    return timedelta(seconds=total)
+            return timedelta(seconds=total)
 
 
 def format_duration(delta: timedelta) -> str:
